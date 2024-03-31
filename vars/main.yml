@@ -24,4 +24,4 @@ caddy_url: "{{ caddy_url_base }}?os={{ caddy_os }}&{{ caddy_arch_param }}\
            &p={{ pkg | urlencode() }}\
            {% endfor %}"
 
-caddy_use_github: "{{ caddy_packages == [] }}"
+caddy_use_github: "{{ caddy_packages == [] and caddy_custom_download_url == '' }}"

@@ -73,27 +73,28 @@
   when: (caddy_update or not caddy_version_file.stat.exists)
   register: caddy_version_cache
 
-- name: Download Caddy
-  ansible.builtin.get_url:
-    url: "{{ caddy_url }}"
-    checksum: "{{ caddy_checksum_url | default(omit) }}"
-    dest: "{{ caddy_home }}/{{ 'caddy.tar.gz' if caddy_use_github else 'caddy' }}"
-    force: true
-    timeout: "{{ caddy_download_timeout }}"
-    mode: 0644
-    owner: "{{ caddy_user }}"
-    group: "{{ caddy_user_details.group }}"
-  retries: 3
-  delay: 2
-  when: "caddy_releases_cache.changed or caddy_features_cache.changed or caddy_version_cache.changed"
-  register: caddy_binary_cache
-  tags: skip_ansible_lint
+# - name: Download Caddy
+#   ansible.builtin.get_url:
+#     url: "{{ caddy_custom_download_url | default(caddy_url) }}"
+#     checksum: "{{ caddy_checksum_url | default(omit) }}"
+#     dest: "{{ caddy_home }}/{{ 'caddy.tar.gz' if (caddy_custom_download_url or caddy_use_github) else 'caddy' }}"
+#     force: true
+#     timeout: "{{ caddy_download_timeout }}"
+#     mode: 0644
+#     owner: "{{ caddy_user }}"
+#     group: "{{ caddy_user_details.group }}"
+#   retries: 3
+#   delay: 2
+#   when: "caddy_releases_cache.changed or caddy_features_cache.changed or caddy_version_cache.changed"
+#   register: caddy_binary_cache
+#   tags: skip_ansible_lint
 
 - name: Download Caddy
   ansible.builtin.get_url:
-    url: "{{ caddy_url }}"
+    url: "{{ caddy_custom_download_url | default(caddy_url) }}"
     checksum: "{{ caddy_checksum_url | default(omit) }}"
-    dest: "{{ caddy_home }}/{{ 'caddy.tar.gz' if caddy_use_github else 'caddy' }}"
+    dest: "{{ caddy_home }}/{{ 'caddy.tar.gz' if (caddy_custom_download_url or caddy_use_github) else 'caddy' }}"
+    force: true
     timeout: "{{ caddy_download_timeout }}"
     mode: 0644
     owner: "{{ caddy_user }}"
@@ -105,7 +106,7 @@
 
 - name: Include tasks to extract files if downloading from github
   ansible.builtin.include_tasks: github-extract.yml
-  when: caddy_use_github
+  when: (caddy_custom_download_url or caddy_use_github)
 
 - name: Copy Caddy Binary
   ansible.builtin.copy:
